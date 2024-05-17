@@ -6,7 +6,7 @@ from dataclasses import asdict
 from typing import Annotated
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
-from user import UserService
+from app.user import UserService
 
 
 user_service = UserService()

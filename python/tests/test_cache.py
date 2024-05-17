@@ -3,7 +3,7 @@ test cache/cache.py
 """
 
 from pytest import mark
-from cache import async_lru_cache
+from app.cache import async_lru_cache
 
 
 @mark.asyncio

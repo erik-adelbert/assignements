@@ -7,7 +7,7 @@ from typing import Dict
 from dataclasses import field
 from pydantic.dataclasses import dataclass
 
-from cache import async_lru_cache
+from app.cache import async_lru_cache
 
 MAXUSERS = 100
 DBRTT = 3e-3  # 3ms

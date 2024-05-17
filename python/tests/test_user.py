@@ -4,7 +4,7 @@ test cache/user.py
 
 from dataclasses import asdict
 from pytest import mark, raises
-from user import User, UserService, MAXUSERS
+from app.user import User, UserService, MAXUSERS
 
 
 def test_new_user():

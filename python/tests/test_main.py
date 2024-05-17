@@ -4,8 +4,8 @@ test cache/main.py
 
 from fastapi.testclient import TestClient
 
-from main import app
-from user import MAXUSERS
+from app.main import app
+from app.user import MAXUSERS
 
 XTOKEN = "shush"
 

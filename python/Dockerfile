@@ -1,18 +1,33 @@
-FROM python:3.11.0
+# syntax=docker/dockerfile:1
 
-# working directory
-WORKDIR /usr/src/app
+# Base setup
+FROM python:3.11.0 AS base
+WORKDIR /code
 
-# copy requirement file to working directory
-COPY requirements.txt ./
+COPY ./requirements.txt /code/requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY ./app /code/app
+
+
+# Testing 
+FROM base AS testing
+
 RUN pip install pytest
 RUN pip install pytest-asyncio
 
-COPY . .
+COPY ./tests /code/tests
+COPY ./app_driver.py /code
 
-RUN chmod +x ./entrypoint.sh
+RUN chmod +x /code/tests/entrypoint.sh
 
-# Code file to execute when the docker container starts up (`entrypoint.sh`)
-CMD ["./entrypoint.sh", "."]
+CMD ["/code/tests/entrypoint.sh", "/code/tests"]
+
+# Standalone app 
+FROM base AS standalone
+
+COPY ./app /code/app
+
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host=0.0.0.0", "--port", "8000"]
