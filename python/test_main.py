@@ -7,19 +7,28 @@ from fastapi.testclient import TestClient
 from main import app
 from user import MAXUSERS
 
+XTOKEN = "shush"
+
 client = TestClient(app)
+
+
+def test_read_root_fail_with_bad_token():
+    """returns 400 error with bad token"""
+    response = client.get("/", headers={"X-Token": "coneofsilence"})
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid X-Token header"}
 
 
 def test_read_root():
     """reports no hit at init"""
-    response = client.get("/")
+    response = client.get("/", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"nhit": 0}
 
 
 def test_user_read_single():
     """can reply to a valid user request"""
-    response = client.get("/user/1")
+    response = client.get("/user/1", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"id": 1, "name": "User1"}
 
@@ -28,12 +37,12 @@ def test_user_read_fail_invalid_user():
     """fails gracefully to an invalid user request"""
 
     tests = {
-        "/user/0": "invalid uid: 0",
-        f"/user/{MAXUSERS + 1}": f"invalid uid: {MAXUSERS + 1}",
+        "/user/0": "Invalid uid: 0",
+        f"/user/{MAXUSERS + 1}": f"Invalid uid: {MAXUSERS + 1}",
     }
 
     for path, expected in tests.items():
-        response = client.get(path)
+        response = client.get(path, headers={"X-Token": XTOKEN})
         assert response.status_code == 404
         assert response.json() == {"detail": expected}
 
@@ -45,7 +54,7 @@ def test_user_read_all():
     responses = [{"id": i, "name": f"User{i}"} for i in range(1, MAXUSERS + 1)]
 
     for req, rep in zip(requests, responses):
-        response = client.get(req)
+        response = client.get(req, headers={"X-Token": XTOKEN})
         assert response.status_code == 200
         assert response.json() == rep
 
@@ -55,11 +64,11 @@ def test_user_read_cache_db_replies():
 
     # read all two times
     for req in [f"/user/{i}" for i in range(1, MAXUSERS + 1)]:
-        client.get(req)
+        client.get(req, headers={"X-Token": XTOKEN})
 
     for req in [f"/user/{i}" for i in range(1, MAXUSERS + 1)]:
-        client.get(req)
+        client.get(req, headers={"X-Token": XTOKEN})
 
-    response = client.get("/")
+    response = client.get("/", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"nhit": MAXUSERS}

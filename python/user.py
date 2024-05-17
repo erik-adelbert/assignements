@@ -9,11 +9,10 @@ from typing import Dict
 from cache import async_lru_cache
 
 MAXUSERS = 100
-SLEEP_DURATION = 3e-3  # 3 ms sleep
-# SLEEP_DURATION = 3e-6  # 3 μs sleep
+DBRTT = 3e-3  # 3ms
 
 
-@dataclass
+@dataclass(slots=True)
 class User:
     """
     User infos
@@ -36,16 +35,16 @@ class UserService:
         self._async_init().__await__()
 
     def __hash__(self):
-        return hash(repr(self.db))
+        return hash(str(self.db))
 
     def __eq__(self, other):
-        return repr(self.db) == repr(other)
+        return str(self.db) == str(other)
 
     def __post_init__(self):
         self.db = {i: User(id=i, name=f"User{i}") for i in range(1, MAXUSERS + 1)}
 
     async def _async_init(self):
-        await sleep(SLEEP_DURATION)  # db round-trip
+        await sleep(DBRTT)  # db round-trip
         return self
 
     @async_lru_cache(maxsize=MAXUSERS)
@@ -54,10 +53,10 @@ class UserService:
         Serve user infos from
         """
         if uid < 1 or uid > MAXUSERS:
-            raise ValueError(f"invalid uid: {uid}")
+            raise ValueError(f"Invalid uid: {uid}")
 
         self.nhit += 1
-        await sleep(SLEEP_DURATION)  # db round-trip
+        await sleep(DBRTT)  # db round-trip
 
         return asdict(self.db[uid])
 
