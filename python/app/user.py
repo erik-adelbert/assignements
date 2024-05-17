@@ -38,10 +38,6 @@ class UserService:
     def __post_init__(self):
         self.db = {i: User(id=i, name=f"User{i}") for i in range(1, MAXUSERS + 1)}
 
-    async def _async_init(self):
-        await sleep(DBRTT)  # db round-trip
-        return self
-
     @async_lru_cache(maxsize=MAXUSERS)
     async def user(self, uid: int) -> User:
         """
