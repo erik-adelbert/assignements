@@ -1,0 +1,29 @@
+name: validpush
+run-name: Push validation started by ${{ github.actor }}
+on: [push]
+jobs:
+  check-all:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Lint with pylint
+      run: |
+        pip install pylint
+        python -m pylint $(git ls-files '*.py')
+    - name: Lint with black
+      uses: psf/black@stable
+      with:
+        version: '~= 23.0'
+        src: "./app"
+    - name: Unit test with pytest
+      run: |
+        pip install pytest pytest-asyncio
+        python -m pytest tests --doctest-modules

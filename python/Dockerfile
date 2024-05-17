@@ -11,23 +11,20 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./app /code/app
 
 
-# Testing 
+# Standalone testing 
 FROM base AS testing
 
 RUN pip install pytest
 RUN pip install pytest-asyncio
 
-COPY ./tests /code/tests
 COPY ./app_driver.py /code
-
+COPY ./tests /code/tests
 RUN chmod +x /code/tests/entrypoint.sh
 
 CMD ["/code/tests/entrypoint.sh", "/code/tests"]
 
 # Standalone app 
 FROM base AS standalone
-
-COPY ./app /code/app
 
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host=0.0.0.0", "--port", "8000"]
