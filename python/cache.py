@@ -7,15 +7,16 @@ from asyncio import ensure_future
 from functools import lru_cache
 
 
-def async_lru_cache(*args, **kwargs):
+def async_lru_cache(*lru_cache_args, **lru_cache_kwargs):
     """decorator with options"""
 
     def async_lru_cache_decorator(
         async_function,
     ):
-        @lru_cache(*args, **kwargs)
-        def cached_async_function(*args, **kwargs):
-            coroutine = async_function(*args, **kwargs)
+
+        @lru_cache(*lru_cache_args, **lru_cache_kwargs)
+        def cached_async_function(*fun_args, **fun_kwargs):
+            coroutine = async_function(*fun_args, **fun_kwargs)
             return ensure_future(coroutine)
 
         return cached_async_function
