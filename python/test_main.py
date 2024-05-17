@@ -12,18 +12,25 @@ XTOKEN = "shush"
 client = TestClient(app)
 
 
-def test_read_root_fail_with_bad_token():
+def test_root_read_fail_with_bad_token():
     """returns 400 error with bad token"""
     response = client.get("/", headers={"X-Token": "coneofsilence"})
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid X-Token header"}
 
 
-def test_read_root():
+def test_root_read():
     """reports no hit at init"""
     response = client.get("/", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"nhit": 0}
+
+
+def test_user_read_fail_with_bad_token():
+    """returns 400 error with bad token"""
+    response = client.get("/user/1", headers={"X-Token": "coneofsilence"})
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid X-Token header"}
 
 
 def test_user_read_single():

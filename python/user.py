@@ -3,8 +3,9 @@ DBAccess caching toy example
 """
 
 from asyncio import sleep
-from dataclasses import asdict, dataclass, field
 from typing import Dict
+from dataclasses import field
+from pydantic.dataclasses import dataclass
 
 from cache import async_lru_cache
 
@@ -22,7 +23,7 @@ class User:
     name: str = ""
 
 
-@dataclass
+@dataclass(slots=True)
 class UserService:
     """
     Serve user info from a cached DB
@@ -31,14 +32,8 @@ class UserService:
     db: Dict[int, User] = field(init=False, default=False)
     nhit: int = field(init=False, default=0)
 
-    def __await__(self):
-        self._async_init().__await__()
-
     def __hash__(self):
         return hash(str(self.db))
-
-    def __eq__(self, other):
-        return str(self.db) == str(other)
 
     def __post_init__(self):
         self.db = {i: User(id=i, name=f"User{i}") for i in range(1, MAXUSERS + 1)}
@@ -48,7 +43,7 @@ class UserService:
         return self
 
     @async_lru_cache(maxsize=MAXUSERS)
-    async def user(self, uid: int) -> Dict[str, any]:
+    async def user(self, uid: int) -> User:
         """
         Serve user infos from
         """
@@ -58,10 +53,10 @@ class UserService:
         self.nhit += 1
         await sleep(DBRTT)  # db round-trip
 
-        return asdict(self.db[uid])
+        return self.db[uid]
 
-    async def hits(self) -> Dict[str, int]:
+    async def hits(self) -> int:
         """
         Serve the current number of db hits
         """
-        return {"nhit": self.nhit}
+        return self.nhit

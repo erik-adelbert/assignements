@@ -2,12 +2,12 @@
 Async cached db access toy main file
 """
 
+from dataclasses import asdict
 from typing import Annotated
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 from user import UserService
 
-FAKETOKEN = "shush"
 
 user_service = UserService()
 app = FastAPI()
@@ -24,9 +24,9 @@ async def read_root(x_token: Annotated[str, Header()]):
     """
     Returns the current number od db hits
     """
-    if x_token != FAKETOKEN:
-        raise HTTPException(status_code=400, detail="Invalid X-Token header")
-    return await user_service.hits()
+    check_token(x_token)
+
+    return HitModel(nhit=await user_service.hits())
 
 
 class UserModel(BaseModel):
@@ -41,12 +41,19 @@ async def read_user(user_id: int, x_token: Annotated[str, Header()]):
     """
     Returns the given user info
     """
-
-    if x_token != FAKETOKEN:
-        raise HTTPException(status_code=400, detail="Invalid X-Token header")
+    check_token(x_token)
 
     try:
-        response = await user_service.user(user_id)
-        return response
+        response = asdict(await user_service.user(user_id))
+        return UserModel.model_validate(response)
     except ValueError as err:
         raise HTTPException(status_code=404, detail=str(err)) from err
+
+
+FAKETOKEN = "shush"
+
+
+def check_token(x_token: str) -> None | Exception:
+    """checks x_token against the fake token"""
+    if x_token != FAKETOKEN:
+        raise HTTPException(status_code=400, detail="Invalid X-Token header")
