@@ -14,9 +14,7 @@ COPY ./app /code/app
 # Standalone testing 
 FROM base AS testing
 
-RUN pip install coverage
-RUN pip install pytest
-RUN pip install pytest-asyncio
+RUN pip install coverage pytest pytest-asyncio
 
 COPY ./app_driver.py /code
 COPY ./tests /code/tests
