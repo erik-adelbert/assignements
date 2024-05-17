@@ -38,7 +38,7 @@ USER_SERVICE = UserService()
 async def test_user_service_initial_hit_count_is_zero():
     """returns initial nhit"""
     nhit = await USER_SERVICE.hits()
-    assert nhit == {"nhit": 0}
+    assert nhit == 0
 
 
 @mark.asyncio
@@ -46,7 +46,7 @@ async def test_user_service_expected_user():
     """returns an expected user"""
 
     user = await USER_SERVICE.user(MAXUSERS)
-    assert user == asdict(User(id=MAXUSERS, name=f"User{MAXUSERS}"))
+    assert user == User(id=MAXUSERS, name=f"User{MAXUSERS}")
 
 
 @mark.asyncio

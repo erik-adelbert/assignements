@@ -6,8 +6,8 @@ import asyncio
 import time
 import aiohttp
 
-
 FASTAPI = "http://127.0.0.1:8000"
+XTOKEN = "shush"
 MAXUSERS = 100
 FACTOR = 100
 
@@ -19,9 +19,9 @@ async def get(url, session):
     request one
     """
     try:
-        async with session.get(url=url) as response:
+        async with session.get(url=url, headers={"X-Token": XTOKEN}) as response:
             await response.read()
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         print(f"Unable to get url {url} due to { e.__class__}.")
 
 

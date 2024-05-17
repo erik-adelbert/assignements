@@ -1,0 +1,4 @@
+aiohttp==3.9.5
+fastapi==0.111.0
+pydantic==2.7.1
+pytest==7.4.0
