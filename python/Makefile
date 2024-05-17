@@ -1,4 +1,6 @@
-.PHONY: clean
+.PHONY: all clean docker-test docker-app user-service-drive
+
+all: docker-test clean
 
 clean:
 	docker rmi user-service-test || true
