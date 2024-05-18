@@ -15,13 +15,14 @@ launch-drive:
 
 # Define the base image name
 BASE_IMAGE_NAME := user-service
+API_PORT := 8000
 
 # Pattern rule for docker targets restricted to "test" or "app"
 docker-%:
 	@if [ "$*" = "test" ] || [ "$*" = "app" ]; then \
 		echo "Building and running target: $*"; \
 		docker build --target $* -t $(BASE_IMAGE_NAME)-$* .; \
-		docker run --rm $(BASE_IMAGE_NAME)-$*; \
+		docker run --rm -p $(API_PORT):$(API_PORT) $(BASE_IMAGE_NAME)-$*; \
 	else \
 		echo "Invalid target: $*. Only 'test' and 'app' are allowed."; \
 		exit 1; \
@@ -29,6 +30,9 @@ docker-%:
 
 # Clean target to remove created Docker images
 clean:
+	@echo
+	@echo "Identifying and removing Docker image(s):"
+
 	@docker image inspect $(BASE_IMAGE_NAME)-test > /dev/null 2>&1 && \
 	docker rmi user-service-test || true
 

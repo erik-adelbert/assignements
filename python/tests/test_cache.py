@@ -7,7 +7,7 @@ from app.cache import async_lru_cache
 
 
 @mark.asyncio
-async def test_async_cache_decorator_should_cache_async_func():
+async def test_decorator_should_cache_async_func():
     """
     Interposes cache when called
     """
