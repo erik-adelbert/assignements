@@ -4,6 +4,7 @@ UserService API driver
 
 import asyncio
 import time
+import random
 import sys
 import aiohttp
 
@@ -13,12 +14,20 @@ XTOKEN = "shush"
 MAXUSERS = 1000
 FACTOR = 10
 
+# get api port
 try:
     port = int(sys.argv[1])
 except (ValueError, IndexError):
     port = APIPORT  # pylint: disable=invalid-name
 
-requests = [f"{FASTAPI}:{port}/user/{i}" for i in range(1, MAXUSERS + 1)]
+
+# build requests
+requests = [
+    f"{FASTAPI}:{port}/user/{i}" for i in range(1, MAXUSERS + int(MAXUSERS / 4))
+]  # MAXUSERS good id + 25% bad id requests
+
+random.shuffle(requests)  # fischer-yeats
+requests = requests[:MAXUSERS]  # still 4/1 good vs. bad ratio
 
 
 async def get(url, session):
@@ -27,26 +36,62 @@ async def get(url, session):
     """
     try:
         async with session.get(url=url, headers={"X-Token": XTOKEN}) as response:
-            await response.read()
+            return await response.read()
     except Exception as e:  # pylint: disable=broad-exception-caught
         print(f"Unable to get url {url} due to { e.__class__}.")
 
 
 async def main(urls):
     """
-    driver
+    request all
     """
     async with aiohttp.ClientSession() as session:
-        ret = await asyncio.gather(*(get(url, session) for url in urls))
-    print(f"Finalized all. Return is a list of len {len(ret)} outputs.")
+        return await asyncio.gather(*(get(url, session) for url in urls))
 
 
+# run requests
 start = time.time()
-asyncio.run(main(requests * FACTOR))
+responses = asyncio.run(main(requests * FACTOR))
 end = time.time()
 
-top = int((end - start) * 1_000_000 / (MAXUSERS * FACTOR))  # time per op in μs
+# acknowledge termination
+nresponses = len(responses)
+out = [f"Finalized all. Return is a list of len {nresponses} outputs."]
 
-print(
-    f"Took {end - start:.2f} seconds to pull {MAXUSERS * FACTOR} requests: {top}μs/op"
-)
+# build stats
+if nresponses:
+    nerrors: int = len(
+        list(
+            filter(
+                lambda x: x if x and "Invalid" in x.decode("ascii") else False,
+                responses,
+            )
+        )
+    )
+    nsuccess: int = len(
+        list(
+            filter(
+                lambda x: x if x and "name" in x.decode("ascii") else False,
+                responses,
+            )
+        )
+    )
+
+    def _percent(x: int) -> int:
+        return round(x / nresponses * 100)
+
+    ok, nok = _percent(nsuccess), _percent(nerrors)
+    nhard = _percent(nresponses - (nsuccess + nerrors))  # expect 0
+
+    out.append(
+        f"\nResponses ratios | 200: {ok}% | 404: {nok}% | hard errors: {nhard}% | "
+        "(expected: ~ 80/20/0)"
+    )
+
+# compute time per op
+μs = 1_000_000  # pylint: disable=non-ascii-name, invalid-name
+δt, N = end - start, MAXUSERS * FACTOR  # pylint: disable=non-ascii-name, invalid-name
+out.append(f"\nTook ~{δt:.2f} seconds to pull {N} requests: {int(δt / N * μs)}μs/op")
+
+# display results
+print("\n".join(out))
