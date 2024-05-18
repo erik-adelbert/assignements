@@ -1,5 +1,8 @@
 """
-UserService API driver
+app_driver.py --
+UserService API basic driver
+
+erik@adelbert.fr - 2024/05
 """
 
 import asyncio
@@ -31,9 +34,7 @@ requests = requests[:MAXUSERS]  # still 4/1 good vs. bad ratio
 
 
 async def get(url, session):
-    """
-    request one
-    """
+    """Request one"""
     try:
         async with session.get(url=url, headers={"X-Token": XTOKEN}) as response:
             return await response.read()
@@ -42,9 +43,7 @@ async def get(url, session):
 
 
 async def main(urls):
-    """
-    request all
-    """
+    """Request all"""
     async with aiohttp.ClientSession() as session:
         return await asyncio.gather(*(get(url, session) for url in urls))
 

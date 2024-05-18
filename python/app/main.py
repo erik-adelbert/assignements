@@ -1,5 +1,11 @@
 """
-Async cached db access toy main file
+main.py --
+This is a toy FastAPI app that features a single dataclass-based user info service.
+Accesses to the DB are mocked but nonetheless in-memory cached.
+Everything works asynchronously and internal "endpoints" use pydantic validation.
+A fake toy token authorization is also used on this app endpoints.
+
+erik@adelbert.fr - 2024/05
 """
 
 from dataclasses import asdict
@@ -14,23 +20,21 @@ app = FastAPI()
 
 
 class HitModel(BaseModel):
-    """hit model"""
+    """Hit validation model"""
 
     nhit: int
 
 
 @app.get("/", response_model=HitModel)
 async def read_root(x_token: Annotated[str, Header()]):
-    """
-    Returns the current number od db hits
-    """
+    """Return the current number od db hits"""
     check_token(x_token)
 
     return HitModel(nhit=await user_service.hits())
 
 
 class UserModel(BaseModel):
-    """user model"""
+    """User validation model"""
 
     id: int
     name: str
@@ -38,9 +42,7 @@ class UserModel(BaseModel):
 
 @app.get("/user/{user_id}", response_model=UserModel)
 async def read_user(user_id: int, x_token: Annotated[str, Header()]):
-    """
-    Returns the given user info
-    """
+    """Return the given user info"""
     check_token(x_token)
 
     try:
@@ -54,6 +56,6 @@ FAKETOKEN = "shush"
 
 
 def check_token(x_token: str) -> None | Exception:
-    """checks x_token against the fake token"""
+    """Check x_token against the fake token"""
     if x_token != FAKETOKEN:
         raise HTTPException(status_code=400, detail="Invalid X-Token header")

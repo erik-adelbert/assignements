@@ -1,5 +1,8 @@
 """
-test cache/cache.py
+test_cache.py --
+Unit tests
+
+erik@adelbert.fr - 2024/05
 """
 
 from pytest import mark
@@ -8,9 +11,7 @@ from app.cache import async_lru_cache
 
 @mark.asyncio
 async def test_decorator_should_cache_async_func():
-    """
-    Interposes cache when called
-    """
+    """Interposes cache when called"""
     pid = _positive()
 
     @async_lru_cache(maxsize=2)

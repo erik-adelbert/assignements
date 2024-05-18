@@ -1,5 +1,9 @@
 """
-DBAccess caching toy example
+user.py --
+A pair of pydantic dataclass that support Reading from a DB through
+an in-memory cache
+
+erik@adelbert.fr - 2024/05
 """
 
 from asyncio import sleep
@@ -15,9 +19,7 @@ DBRTT = 3e-3  # 3ms
 
 @dataclass(slots=True)
 class User:
-    """
-    User infos
-    """
+    """User infos"""
 
     id: int = 0
     name: str = ""
@@ -25,9 +27,7 @@ class User:
 
 @dataclass(slots=True)
 class UserService:
-    """
-    Serve user info from a cached DB
-    """
+    """User info service from a cached DB"""
 
     db: Dict[int, User] = field(init=False, default=False)
     nhit: int = field(init=False, default=0)
@@ -40,9 +40,7 @@ class UserService:
 
     @async_lru_cache(maxsize=MAXUSERS)
     async def user(self, uid: int) -> User:
-        """
-        Serve user infos from
-        """
+        """Return user infos"""
         if uid < 1 or uid > MAXUSERS:
             raise ValueError(f"Invalid uid: {uid}")
 
@@ -52,7 +50,5 @@ class UserService:
         return self.db[uid]
 
     async def hits(self) -> int:
-        """
-        Serve the current number of db hits
-        """
+        """Return the current count of db hits"""
         return self.nhit

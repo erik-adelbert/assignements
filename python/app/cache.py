@@ -1,6 +1,8 @@
 """
 cache.py -- 
-pythonic async in-memory cache
+A pythonic async in-memory cache
+
+erik@adelbert.fr - 2024/05
 """
 
 from asyncio import ensure_future
@@ -8,7 +10,7 @@ from functools import lru_cache
 
 
 def async_lru_cache(*lru_cache_args, **lru_cache_kwargs):
-    """decorator with options"""
+    """Decorator with lru_cache options"""
 
     def async_lru_cache_decorator(
         async_function,

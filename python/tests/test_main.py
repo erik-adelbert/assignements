@@ -1,5 +1,8 @@
 """
-test cache/main.py
+test_main.py --
+Unit tests
+
+erik@adelbert.fr - 2024/05
 """
 
 from fastapi.testclient import TestClient
@@ -13,35 +16,35 @@ client = TestClient(app)
 
 
 def test_root_read_fail_with_bad_token():
-    """returns 400 error with bad token"""
+    """Returns 400 error with bad token"""
     response = client.get("/", headers={"X-Token": "coneofsilence"})
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid X-Token header"}
 
 
 def test_root_read():
-    """reports no hit at init"""
+    """Reports no hit at init"""
     response = client.get("/", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"nhit": 0}
 
 
 def test_user_read_fail_with_bad_token():
-    """returns 400 error with bad token"""
+    """Returns 400 error with bad token"""
     response = client.get("/user/1", headers={"X-Token": "coneofsilence"})
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid X-Token header"}
 
 
 def test_user_read_single():
-    """can reply to a valid user request"""
+    """Replies to a valid user request"""
     response = client.get("/user/1", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"id": 1, "name": "User1"}
 
 
 def test_user_read_fail_invalid_user():
-    """fails gracefully to an invalid user request"""
+    """Fails gracefully to an invalid user request"""
 
     tests = {
         "/user/0": "Invalid uid: 0",
@@ -55,7 +58,7 @@ def test_user_read_fail_invalid_user():
 
 
 def test_user_read_all():
-    """replies to all valid requests"""
+    """Replies to all valid requests"""
 
     requests = [f"/user/{i}" for i in range(1, MAXUSERS + 1)]
     responses = [{"id": i, "name": f"User{i}"} for i in range(1, MAXUSERS + 1)]
@@ -67,7 +70,7 @@ def test_user_read_all():
 
 
 def test_user_read_cache_db_replies():
-    """replies to all valid requests"""
+    """Replies to all valid requests"""
 
     # read all users twice
     for _ in range(2):

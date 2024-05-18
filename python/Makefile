@@ -1,6 +1,6 @@
 .PHONY: all build-run-app build-run-test launch-drive docker-% clean
 
-# container CLI, could also be podeman
+# Container CLI, could also be podeman or lima
 DOCKER ?= docker
 
 # Define the container image name prefix
