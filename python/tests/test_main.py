@@ -69,13 +69,12 @@ def test_user_read_all():
 def test_user_read_cache_db_replies():
     """replies to all valid requests"""
 
-    # read all two times
-    for req in [f"/user/{i}" for i in range(1, MAXUSERS + 1)]:
-        client.get(req, headers={"X-Token": XTOKEN})
+    # read all users twice
+    for _ in range(2):
+        for req in [f"/user/{i}" for i in range(1, MAXUSERS + 1)]:
+            _ = client.get(req, headers={"X-Token": XTOKEN})  # discard response
 
-    for req in [f"/user/{i}" for i in range(1, MAXUSERS + 1)]:
-        client.get(req, headers={"X-Token": XTOKEN})
-
+    # assert that cache have halved the hits on db
     response = client.get("/", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"nhit": MAXUSERS}

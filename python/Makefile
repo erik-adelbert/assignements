@@ -1,5 +1,14 @@
 .PHONY: all build-run-app build-run-test launch-drive docker-% clean
 
+# container CLI, could also be podeman
+DOCKER ?= docker
+
+# Define the base image name
+BASE_IMAGE_NAME := user-service
+
+# Local app port mapping
+API_PORT := 8000
+
 # Default to testing
 all: docker-test clean
 
@@ -13,19 +22,21 @@ build-run-test: docker-test
 launch-drive:
 	python app_driver.py
 
-# Define the base image name
-BASE_IMAGE_NAME := user-service
-API_PORT := 8000
-
 # Pattern rule for docker targets restricted to "test" or "app"
 docker-%:
 	@if [ "$*" = "test" ] || [ "$*" = "app" ]; then \
-		echo "Building and running target: $*"; \
-		docker build --target $* -t $(BASE_IMAGE_NAME)-$* .; \
-		docker run --rm -p $(API_PORT):$(API_PORT) $(BASE_IMAGE_NAME)-$*; \
+		echo "Building target: $*"; \
+		$(DOCKER) build --target $* -t $(BASE_IMAGE_NAME)-$* .; \
 	else \
 		echo "Invalid target: $*. Only 'test' and 'app' are allowed."; \
 		exit 1; \
+	fi
+
+	@echo "Running target: $*";
+	@if [ "$*" = "test" ]; then \
+		$(DOCKER) run --rm $(BASE_IMAGE_NAME)-$*; \
+	else \
+		$(DOCKER) run --rm -p $(API_PORT):8000 $(BASE_IMAGE_NAME)-$*; \
 	fi
 
 # Clean target to remove created Docker images
@@ -34,7 +45,7 @@ clean:
 	@echo "Identifying and removing Docker image(s):"
 
 	@docker image inspect $(BASE_IMAGE_NAME)-test > /dev/null 2>&1 && \
-	docker rmi user-service-test || true
+	$(DOCKER) rmi user-service-test
 
 	@docker image inspect $(BASE_IMAGE_NAME)-test-app > /dev/null 2>&1 && \
-	docker rmi user-service-app || true
+	$(DOCKER) rmi user-service-app
