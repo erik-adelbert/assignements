@@ -4,14 +4,21 @@ UserService API driver
 
 import asyncio
 import time
+import sys
 import aiohttp
 
-FASTAPI = "http://127.0.0.1:8000"
+FASTAPI = "http://127.0.0.1"
+APIPORT = 8000
 XTOKEN = "shush"
-MAXUSERS = 100
-FACTOR = 100
+MAXUSERS = 1000
+FACTOR = 10
 
-requests = [f"{FASTAPI}/user/{i}" for i in range(1, MAXUSERS + 1)]
+try:
+    port = int(sys.argv[1])
+except (ValueError, IndexError):
+    port = APIPORT  # pylint: disable=invalid-name
+
+requests = [f"{FASTAPI}:{port}/user/{i}" for i in range(1, MAXUSERS + 1)]
 
 
 async def get(url, session):
@@ -38,4 +45,8 @@ start = time.time()
 asyncio.run(main(requests * FACTOR))
 end = time.time()
 
-print(f"Took {end - start} seconds to pull {len(requests) * FACTOR} requests.")
+top = int((end - start) * 1_000_000 / (MAXUSERS * FACTOR))  # time per op in μs
+
+print(
+    f"Took {end - start:.2f} seconds to pull {MAXUSERS * FACTOR} requests: {top}μs/op"
+)

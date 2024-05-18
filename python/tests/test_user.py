@@ -5,6 +5,7 @@ test cache/user.py
 from dataclasses import asdict
 from pydantic_core import ValidationError
 from pytest import mark, raises
+
 from app.user import User, UserService, MAXUSERS
 
 
@@ -43,7 +44,7 @@ USER_SERVICE = UserService()
 
 @mark.asyncio
 async def test_user_service_initial_hit_count_is_zero():
-    """returns initial nhit"""
+    """returns initial nhit == 0"""
     nhit = await USER_SERVICE.hits()
     assert nhit == 0
 

@@ -18,11 +18,13 @@ build-run-app: docker-app
 # Build and run containerized tests
 build-run-test: docker-test
 
-# Launch a drive test build-run-test must be running
+# Launch a simple stress test build-run-test must be running 
+# on localhost
+#
 # Depends on python module aiohttp being available to python:
 # $ pip install aiohttp
 launch-drive:
-	python app_driver.py
+	python app_driver.py $(API_PORT)
 
 # Pattern rule for docker targets restricted to "test" or "app"
 docker-%:

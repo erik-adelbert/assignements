@@ -9,7 +9,7 @@ from pydantic.dataclasses import dataclass
 
 from app.cache import async_lru_cache
 
-MAXUSERS = 100
+MAXUSERS = 1000
 DBRTT = 3e-3  # 3ms
 
 
