@@ -3,11 +3,11 @@
 # container CLI, could also be podeman
 DOCKER ?= docker
 
-# Define the base image name
-BASE_IMAGE_NAME := user-service
+# Define the container image name prefix
+BASE_IMAGE_NAME ?= user-service
 
 # Local app port mapping
-API_PORT := 8000
+API_PORT ?= 8000
 
 # Default to testing
 all: docker-test clean
@@ -19,6 +19,8 @@ build-run-app: docker-app
 build-run-test: docker-test
 
 # Launch a drive test build-run-test must be running
+# Depends on python module aiohttp being available to python:
+# $ pip install aiohttp
 launch-drive:
 	python app_driver.py
 
