@@ -11,7 +11,7 @@ provides a summary of the performance and response statistics.
 python stress.py 8000
 Finalized all. Return is a list of len 10000 outputs.
 
-Responses ratios | 200: 80% | 404: 20% | hard errors: 0% | (expected: ~ 80/20/0)
+Responses ratio | 200: 80% | 404: 20% | hard errors: 0% | (expected: ~ 80/20/0)
 
 Took ~5.45 seconds to pull 10000 requests: 544μs/op
 ```
@@ -76,23 +76,23 @@ out = [f"Finalized all. Return is a list of len {nresponses} outputs."]
 
 # Basic stats
 if nresponses:
-    nerrors = sum(1 for r in responses if r and "Invalid" in r.decode("ascii"))
+    nerror = sum(1 for r in responses if r and "Invalid" in r.decode("ascii"))
     nsuccess = sum(1 for r in responses if r and "name" in r.decode("ascii"))
 
     def _percent(x: int) -> int:
         return round(x / nresponses * 100)
 
-    ok, nok = _percent(nsuccess), _percent(nerrors)
-    nhard = _percent(nresponses - (nsuccess + nerrors))  # expect 0
+    ok, nok = _percent(nsuccess), _percent(nerror)
+    unxp = _percent(nresponses - (nsuccess + nerror))
 
     out.append(
-        f"\nResponses ratios | 200: {ok}% | 404: {nok}% | hard errors: {nhard}% | "
+        f"Responses ratio | 200: {ok}% | 404: {nok}% | unexpected: {unxp}% | "
         "(expected: ~ 80/20/0)"
     )
 
 # Timing and Final Output
 μs = 1_000_000  # pylint: disable=non-ascii-name, invalid-name
 δt, N = end - start, MAXUSERS * FACTOR  # pylint: disable=non-ascii-name, invalid-name
-out.append(f"\nTook ~{δt:.2f} seconds to pull {N} requests: {int(δt / N * μs)}μs/op")
+out.append(f"Took ~{δt:.2f} seconds to pull {N} requests: {int(δt / N * μs)}μs/op")
 
-print("\n".join(out))
+print("\n\n".join(out))
