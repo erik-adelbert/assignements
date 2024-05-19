@@ -55,3 +55,7 @@ clean:
 		$(DOCKER) image inspect $(BASE_IMAGE_NAME)-$$target > /dev/null 2>&1 && \
 		$(DOCKER) rmi $(BASE_IMAGE_NAME)-$$target || true; \
 	done
+
+# Dummy count python lines
+lines:
+	@find . -name '*.py' \( -not -iname "__init__.py" \) | xargs wc -l | sort
