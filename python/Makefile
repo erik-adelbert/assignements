@@ -51,8 +51,7 @@ clean:
 	@echo
 	@echo "Identifying and removing Docker image(s):"
 
-	@docker image inspect $(BASE_IMAGE_NAME)-test > /dev/null 2>&1 && \
-	$(DOCKER) rmi $(BASE_IMAGE_NAME)-test || true
-
-	@docker image inspect $(BASE_IMAGE_NAME)-app > /dev/null 2>&1 && \
-	$(DOCKER) rmi $(BASE_IMAGE_NAME)-app || true
+	@for target in test app; do \
+		$(DOCKER) image inspect $(BASE_IMAGE_NAME)-$$target > /dev/null 2>&1 && \
+		$(DOCKER) rmi $(BASE_IMAGE_NAME)-$$target || true; \
+	done
