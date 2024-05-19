@@ -1,7 +1,7 @@
 # A clean toy
 
 This is a toy FastApi app. Explore the Makefile goals. You need a running container service with docker CLI
-and python module `aiohttp` to run the stress-test. By default `make` will build a testing container and run unit tests for everything.
+(and python module `aiohttp` to run the stress-test). By default `make` will build a testing container and run unit tests for everything.
 
 ## Overview of the Project
 
