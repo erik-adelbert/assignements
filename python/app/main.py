@@ -1,9 +1,12 @@
 """
 main.py --
-This is a toy FastAPI app that features a single dataclass-based user info service.
-Accesses to the DB are mocked but nonetheless in-memory cached.
-Everything works asynchronously and internal "endpoints" use pydantic validation.
-A fake toy token authorization is also used on this app endpoints.
+This is a toy FastAPI app.
+
+It defines a FastAPI application that provides user information 
+services. It features a single dataclass-based user info service, 
+mocks database accesses with an in-memory cache, and works 
+asynchronously. The endpoints use Pydantic for validation and 
+implement  a simple token-based authorization.
 
 erik@adelbert.fr - 2024/05
 """

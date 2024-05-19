@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# This script automates the process of running unit tests and 
+# measuring code coverage. It serves as a testing container
+# entrypoint.
+
 TEST_PATH=$1
 
 echo

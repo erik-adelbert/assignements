@@ -1,7 +1,13 @@
 """
 user.py --
-A pair of pydantic dataclass that support Reading from a DB through
-an in-memory cache
+UserService class uses an in-memory cache to store and retrieve
+user data, reducing the load on the simulated database. It employs 
+asynchronous methods to simulate database access and uses caching to 
+optimize performance:
+
+ - The User class models user information with simple fields.
+ - The UserService class handles the logic for caching, retrieving 
+   user data, and tracking database hits.
 
 erik@adelbert.fr - 2024/05
 """

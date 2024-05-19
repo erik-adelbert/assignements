@@ -1,4 +1,7 @@
-.PHONY: all build-run-app build-run-test launch-drive docker-% clean
+# This Makefile provides a streamlined way to build, run, and clean up 
+# Docker containers for the application and its tests. It also includes 
+# a target for running a stress test, which depends aiohttp python module.
+.PHONY: all build-run-app build-run-test stress-test docker-% clean
 
 # Container CLI, could also be podeman or lima
 DOCKER ?= docker
@@ -23,7 +26,7 @@ build-run-test: docker-test
 #
 # Depends on python module aiohttp being available to python:
 # $ pip install aiohttp
-launch-drive:
+stress-test:
 	python app_driver.py $(API_PORT)
 
 # Pattern rule for docker targets restricted to "test" or "app"

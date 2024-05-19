@@ -2,6 +2,12 @@
 cache.py -- 
 A pythonic async in-memory cache
 
+It provides a way to cache the results of asynchronous functions using 
+the lru_cache mechanism. It uses ensure_future to ensure the coroutine 
+is scheduled and a Future object is returned, making it compatible with 
+asynchronous code. The async_lru_cache decorator is flexible and allows 
+passing arguments to customize the behavior of the underlying lru_cache.
+
 erik@adelbert.fr - 2024/05
 """
 
