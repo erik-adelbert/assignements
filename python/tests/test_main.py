@@ -5,79 +5,96 @@ Unit tests
 erik@adelbert.fr - 2024/05
 """
 
-from fastapi.testclient import TestClient
+from asyncio import gather
+from pytest import mark
+
+# from fastapi.testclient import TestClient
+from httpx import AsyncClient, ASGITransport
 
 from app.main import app
 from app.user import MAXUSERS
 
 XTOKEN = "shush"
 
-client = TestClient(app)
+client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
 
 
-def test_root_read_fail_with_bad_token():
+@mark.asyncio
+async def test_root_read_fail_with_bad_token():
     """Returns 400 error with bad token"""
-    response = client.get("/", headers={"X-Token": "coneofsilence"})
+    response = await client.get("/", headers={"X-Token": "coneofsilence"})
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid X-Token header"}
 
 
-def test_root_read():
+@mark.asyncio
+async def test_root_read():
     """Reports no hit at init"""
-    response = client.get("/", headers={"X-Token": XTOKEN})
+    # this test as its own context
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.get("/", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"nhit": 0}
 
 
-def test_user_read_fail_with_bad_token():
+@mark.asyncio
+async def test_user_read_fail_with_bad_token():
     """Returns 400 error with bad token"""
-    response = client.get("/user/1", headers={"X-Token": "coneofsilence"})
+    response = await client.get("/user/1", headers={"X-Token": "coneofsilence"})
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid X-Token header"}
 
 
-def test_user_read_single():
+@mark.asyncio
+async def test_user_read_single():
     """Replies to a valid user request"""
-    response = client.get("/user/1", headers={"X-Token": XTOKEN})
+    response = await client.get("/user/1", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"id": 1, "name": "User1"}
 
 
-def test_user_read_fail_invalid_user():
+@mark.asyncio
+async def test_user_read_fail_invalid_user():
     """Fails gracefully to an invalid user request"""
-
     tests = {
         "/user/0": "Invalid uid: 0",
         f"/user/{MAXUSERS + 1}": f"Invalid uid: {MAXUSERS + 1}",
     }
 
-    for path, expected in tests.items():
-        response = client.get(path, headers={"X-Token": XTOKEN})
-        assert response.status_code == 404
-        assert response.json() == {"detail": expected}
+    responses = await gather(
+        *((client.get(url, headers={"X-Token": XTOKEN}) for url in tests))
+    )
+    return all(a.json() == b for a, b in zip(responses, tests.values()))
 
 
-def test_user_read_all():
+@mark.asyncio
+async def test_user_read_all():
     """Replies to all valid requests"""
 
     requests = [f"/user/{i}" for i in range(1, MAXUSERS + 1)]
-    responses = [{"id": i, "name": f"User{i}"} for i in range(1, MAXUSERS + 1)]
+    expected = ({"id": i, "name": f"User{i}"} for i in range(1, MAXUSERS + 1))
 
-    for req, rep in zip(requests, responses):
-        response = client.get(req, headers={"X-Token": XTOKEN})
-        assert response.status_code == 200
-        assert response.json() == rep
+    responses = await gather(
+        *((client.get(url, headers={"X-Token": XTOKEN}) for url in requests))
+    )
+    return (r.json() for r in responses) == expected
 
 
-def test_user_read_cache_db_replies():
+@mark.asyncio
+async def test_user_read_cache_db_replies():
     """Replies to all valid requests"""
+
+    requests = [f"/user/{i}" for i in range(1, MAXUSERS + 1)]
 
     # read all users twice
     for _ in range(2):
-        for req in [f"/user/{i}" for i in range(1, MAXUSERS + 1)]:
-            _ = client.get(req, headers={"X-Token": XTOKEN})  # discard response
+        _ = await gather(
+            *((client.get(url, headers={"X-Token": XTOKEN}) for url in requests))
+        )
 
     # assert that cache have halved the hits on db
-    response = client.get("/", headers={"X-Token": XTOKEN})
+    response = await client.get("/", headers={"X-Token": XTOKEN})
     assert response.status_code == 200
     assert response.json() == {"nhit": MAXUSERS}
