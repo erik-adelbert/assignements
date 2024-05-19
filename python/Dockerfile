@@ -25,5 +25,8 @@ CMD ["/code/tests/entrypoint.sh", "/code/tests"]
 # Standalone app 
 FROM base AS app
 
-EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host=0.0.0.0", "--port", "8000"]
+ARG API_PORT=${API_PORT}
+ENV API_PORT=${API_PORT}
+
+EXPOSE ${API_PORT}
+CMD exec uvicorn app.main:app --host=0.0.0.0 --port ${API_PORT}

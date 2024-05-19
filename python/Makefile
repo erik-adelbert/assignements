@@ -33,7 +33,7 @@ stress-test:
 docker-%:
 	@if [ "$*" = "test" ] || [ "$*" = "app" ]; then \
 		echo "Building target: $*"; \
-		$(DOCKER) build --target $* -t $(BASE_IMAGE_NAME)-$* .; \
+		$(DOCKER) build --target $* -t $(BASE_IMAGE_NAME)-$* . --build-arg API_PORT="$(API_PORT)"; \
 	else \
 		echo "Invalid target: $*. Only 'test' and 'app' are allowed."; \
 		exit 1; \
@@ -43,7 +43,7 @@ docker-%:
 	@if [ "$*" = "test" ]; then \
 		$(DOCKER) run --rm $(BASE_IMAGE_NAME)-$*; \
 	else \
-		$(DOCKER) run --rm -p $(API_PORT):8000 $(BASE_IMAGE_NAME)-$*; \
+		$(DOCKER) run --rm -p $(API_PORT):$(API_PORT) $(BASE_IMAGE_NAME)-$*; \
 	fi
 
 # Clean target to remove created Docker images
