@@ -9,21 +9,25 @@ provides a summary of the performance and response statistics.
 ```bash
 ❯ make stress-test
 python stress.py 8000
+Running 10000 concurrent requests against http://127.0.0.1:8000/user
 Finalized all. Return is a list of len 10000 outputs.
 
-Responses ratio | 200: 80% | 404: 20% | hard errors: 0% | (expected: ~ 80/20/0)
+Responses ratio | 200: 80% | 404: 20% | unexpected: 0% | (expected: ~ 80/20/0)
 
-Took ~5.45 seconds to pull 10000 requests: 544μs/op
+Took ~5.51 seconds to pull 10000 requests: 551μs/op
 ```
 
 erik@adelbert.fr
 """
 
-import asyncio
-import time
-import random
+from asyncio import gather, run
+from datetime import datetime, timedelta
+from random import shuffle
+
 import sys
-import aiohttp
+
+from aiohttp import ClientSession
+
 
 # Constants and Initialization
 FASTAPI = "http://127.0.0.1"
@@ -44,7 +48,7 @@ requests = [
     f"{FASTAPI}:{port}/user/{i}" for i in range(1, MAXUSERS + int(MAXUSERS / 4))
 ]  # MAXUSERS good id + 25% bad id requests
 
-random.shuffle(requests)  # fischer-yeats
+shuffle(requests)  # fischer-yeats
 requests = requests[:MAXUSERS]  # still 4/1 good vs. bad ratio
 
 
@@ -61,38 +65,43 @@ async def get(url, session):
 # Main Asynchronous Function
 async def main(urls):
     """Request all"""
-    async with aiohttp.ClientSession() as session:
-        return await asyncio.gather(*(get(url, session) for url in urls))
+    async with ClientSession() as session:
+        return await gather(*(get(url, session) for url in urls))
 
 
 # Execution and Timing
-start = time.time()
-responses = asyncio.run(main(requests * FACTOR))
-end = time.time()
+N = MAXUSERS * FACTOR
+
+print(f"Running {N} concurrent requests against {FASTAPI}:{APIPORT}/user")
+dt = datetime.now()
+responses = run(main(requests * FACTOR))
+dt = datetime.now() - dt
 
 # Response Analysis
-nresponses = len(responses)
-out = [f"Finalized all. Return is a list of len {nresponses} outputs."]
+nresponse = len(responses)
+out = [f"Finalized all. Return is a list of len {nresponse} outputs."]
 
 # Basic stats
-if nresponses:
-    nerror = sum(1 for r in responses if r and "Invalid" in r.decode("ascii"))
-    nsuccess = sum(1 for r in responses if r and "name" in r.decode("ascii"))
+if nresponse:
 
     def _percent(x: int) -> int:
-        return round(x / nresponses * 100)
+        return round(x / nresponse * 100)
 
-    ok, nok = _percent(nsuccess), _percent(nerror)
-    unxp = _percent(nresponses - (nsuccess + nerror))
+    def _count(pattern: str):
+        return sum(1 for r in responses if r and pattern in r.decode("ascii"))
 
+    nerror, nsuccess = map(_count, ("Invalid", "name"))
+    unknown = nresponse - (nsuccess + nerror)
+
+    ok, nok, unxp = map(_percent, (nsuccess, nerror, unknown))
     out.append(
         f"Responses ratio | 200: {ok}% | 404: {nok}% | unexpected: {unxp}% | "
         "(expected: ~ 80/20/0)"
     )
 
 # Timing and Final Output
-μs = 1_000_000  # pylint: disable=non-ascii-name, invalid-name
-δt, N = end - start, MAXUSERS * FACTOR  # pylint: disable=non-ascii-name, invalid-name
-out.append(f"Took ~{δt:.2f} seconds to pull {N} requests: {int(δt / N * μs)}μs/op")
+s = timedelta(seconds=1)
+μs = timedelta(microseconds=1)  # pylint: disable=non-ascii-name, invalid-name
+out.append(f"Took ~{dt/s:.2f} seconds to pull {N} requests: {(dt/N)/μs:.0f}μs/op")
 
 print("\n\n".join(out))
