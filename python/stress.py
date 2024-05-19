@@ -1,10 +1,20 @@
 """
-app_driver.py --
+stress.py --
 
 This script performs a stress test on the UserService API by sending multiple
 concurrent requests, measures the time taken for the operations, and analyzes
 the responses to determine the success and error rates. The final output 
 provides a summary of the performance and response statistics.
+
+```bash
+❯ make stress-test
+python stress.py 8000
+Finalized all. Return is a list of len 10000 outputs.
+
+Responses ratios | 200: 80% | 404: 20% | hard errors: 0% | (expected: ~ 80/20/0)
+
+Took ~5.45 seconds to pull 10000 requests: 544μs/op
+```
 
 erik@adelbert.fr
 """

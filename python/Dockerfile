@@ -16,7 +16,7 @@ FROM base AS test
 
 RUN pip install coverage pytest pytest-asyncio
 
-COPY ./app_driver.py /code
+COPY ./stress.py /code
 COPY ./tests /code/tests
 RUN chmod +x /code/tests/entrypoint.sh
 

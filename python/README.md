@@ -17,7 +17,7 @@ This project setup is for a FastAPI-based web application that includes unit tes
 
 ### Testing and Benchmarking
 
-- app_driver.py: A script to perform stress testing on the application, measuring response times and collecting statistics.
+- stress.py: A script to perform stress testing on the application, measuring response times and collecting statistics.
 
 ### Docker Integration
 
@@ -46,7 +46,7 @@ This project setup is for a FastAPI-based web application that includes unit tes
      ├───────────────────────┼───────────────┼─────────────────────────────────────────────┼────────────┤      
      │ ./app/user.py         │ user.py       │ UserService::hits                           │ 0          │      
      ├───────────────────────┼───────────────┼─────────────────────────────────────────────┼────────────┤      
-     │ ./app_driver.py       │ app_driver.py │ main                                        │ 0          │      
+     │ ./stress.py           │ stress.py     │ main                                        │ 0          │      
      ├───────────────────────┼───────────────┼─────────────────────────────────────────────┼────────────┤      
      │ ./tests/test_cache.py │ test_cache.py │ test_decorator_should_cache_async_func      │ 0          │      
      ├───────────────────────┼───────────────┼─────────────────────────────────────────────┼────────────┤      
@@ -76,7 +76,7 @@ This project setup is for a FastAPI-based web application that includes unit tes
      ├───────────────────────┼───────────────┼─────────────────────────────────────────────┼────────────┤      
      │ ./app/main.py         │ main.py       │ read_user                                   │ 1          │      
      ├───────────────────────┼───────────────┼─────────────────────────────────────────────┼────────────┤      
-     │ ./app_driver.py       │ app_driver.py │ get                                         │ 1          │      
+     │ ./stress.py           │ stress.py     │ get                                         │ 1          │      
      ├───────────────────────┼───────────────┼─────────────────────────────────────────────┼────────────┤      
      │ ./tests/test_cache.py │ test_cache.py │ _positive                                   │ 1          │      
      ├───────────────────────┼───────────────┼─────────────────────────────────────────────┼────────────┤      

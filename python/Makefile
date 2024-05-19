@@ -27,7 +27,7 @@ build-run-test: docker-test
 # Depends on python module aiohttp being available to python:
 # $ pip install aiohttp
 stress-test:
-	python app_driver.py $(API_PORT)
+	python stress.py $(API_PORT)
 
 # Pattern rule for docker targets restricted to "test" or "app"
 docker-%:
