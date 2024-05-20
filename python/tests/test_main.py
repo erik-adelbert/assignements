@@ -47,7 +47,6 @@ def create_single(coro, code, expected):
 
     @mark.asyncio
     async def _unit():
-        # Replace this with your actual async test logic
         response = await coro
         assert response.status_code == code
         assert response.json() == expected
